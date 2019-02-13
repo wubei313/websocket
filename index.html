@@ -5,28 +5,40 @@
     <title>Websocket</title>
 </head>
 <body>
-    <h1>Echo Test</h1>
+    <h1>Chat Room</h1>
     <input id="sendTxt" type="text" />
     <button id="sendBtn">send</button>
-    <div id="recv"></div>
     <script>
         let log = console.log.bind(console)
+
+        function showMessage(str, type) {
+            let div = document.createElement('div')
+            div.innerHTML = str
+            if(type == 'enter') {
+                div.style.color = 'blue'
+            } else if(type == 'leave') {
+                div.style.color = 'red'
+            }
+            document.body.appendChild(div)
+        }
 
         let websocket = new WebSocket('ws://localhost:3000')
         websocket.onopen = function() {
             log('websocket open')
-            document.getElementById('recv').innerHTML = 'Connected'
+            document.getElementById('sendBtn').onclick = function() {
+                let txt = document.getElementById('sendTxt').value
+                if(txt) {
+                    websocket.send(txt)
+                }
+            }
         }
         websocket.onclose = function() {
             log('websocket close')
         }
         websocket.onmessage = function(e){
             log(e.data)
-            document.getElementById('recv').innerHTML = e.data
-        }
-        document.getElementById('sendBtn').onclick = function() {
-            let txt = document.getElementById('sendTxt').value
-            websocket.send(txt)
+            let mes = JSON.parse(e.data)
+            showMessage(mes.data, mes.type)
         }
     </script>
 </body>
